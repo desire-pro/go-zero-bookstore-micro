@@ -5,6 +5,7 @@
 
 ### API接口 代碼結構
 
+```Plain Text
 api
 ├── bookstore.api                  // api描述文件，定義api
 ├── bookstore.go                   // main入口定義
@@ -25,12 +26,15 @@ api
     └── types
         └── types.go               // 定義了api請求和返回數據結構
 
+```
+
 > 區分 handler 和 logic 是為了讓業務處理部分盡可能減少依賴，把 HTTP requests 和邏輯處理代碼隔離開，便於後續拆分成 RPC service
 
 ---
 
 ### RPC 服務代碼結構
 
+```Plain Text
 rpc/add
 ├── add.go                      // rpc服務main函數
 ├── add.proto                   // rpc接口定義
@@ -51,6 +55,7 @@ rpc/add
 └── pb
     └── add.pb.go               // protoc-gen-go產生的結構檔案
 
+```
 ___________________________________________________________________________________________________________________
 
 ## RPC 服務
@@ -123,8 +128,8 @@ ________________________________________________________________________________
     docker-compose -f docker-compose-prom.yml up -d
 
 注意：
-    http://127.0.0.1:9090/ 普羅米修斯 web url
-    http://localhost:3000/ Grafana web url
+- http://127.0.0.1:9090/ 普羅米修斯 web url
+- http://localhost:3000/ Grafana web url
     
 3、docker-compose 創建rpc服務容器，rpc 服務基於依賴於 etcd 服務
     執行命令：
