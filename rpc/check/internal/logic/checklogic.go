@@ -2,11 +2,12 @@ package logic
 
 import (
 	"context"
+	"fmt"
 
 	"bookstore/rpc/check/internal/svc"
 	check "bookstore/rpc/check/pb"
 
-	"github.com/tal-tech/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type CheckLogic struct {
@@ -24,7 +25,7 @@ func NewCheckLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CheckLogic 
 }
 
 func (l *CheckLogic) Check(in *check.CheckReq) (*check.CheckResp, error) {
-
+	fmt.Println("test")
 	book, err := l.svcCtx.Model.FindOne(in.Book)
 	if err != nil {
 		return nil, err

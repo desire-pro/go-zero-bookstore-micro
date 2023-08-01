@@ -1,5 +1,4 @@
-# 忽略 default.etcd 目录
-
+# 忽略 default.etcd 目錄
 default.etcd
 ./api/default.etcd
 .idea

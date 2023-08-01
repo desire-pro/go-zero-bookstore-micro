@@ -1,29 +1,43 @@
-info(
-	title: // TODO: add title
-	desc: // TODO: add description
-	author: 郑州-刘凯
-	email: 154824679@qq.com
-)
-
 type (
-	addReq struct {
-		book  string `form:"book"`
-		price int64  `form:"price"`
+	addReq {
+		Book  string `form:"book"`
+		Price int64  `form:"price"`
 	}
 
-	addResp struct {
-		ok bool `json:"ok"`
+	addResp {
+		Ok bool `json:"ok"`
 	}
 )
 
 type (
-	checkReq struct {
-		book string `form:"book"`
+	checkReq {
+		Book string `form:"book"`
 	}
 
-	checkResp struct {
-		found bool  `json:"found"`
-		price int64 `json:"price"`
+	checkResp {
+		Found bool  `json:"found"`
+		Price int64 `json:"price"`
+	}
+)
+
+type (
+	updateReq {
+		Book  string `form:"book"`
+		Price int64  `form:"price"`
+	}
+
+	updateResp {
+		Ok bool `json:"ok"`
+	}
+)
+
+type (
+	deleteReq {
+		Book string `form:"book"`
+	}
+
+	deleteResp {
+		Ok bool `json:"ok"`
 	}
 )
 
@@ -37,5 +51,14 @@ service bookstore-api {
 		handler: CheckHandler
 	)
 	get /check(checkReq) returns(checkResp)
-}
 
+	@server(
+		handler: UpdateHandler
+	)
+	get /update(updateReq) returns(updateResp)
+
+	@server(
+		handler: DeleteHandler
+	)
+	get /delete(deleteReq) returns(deleteResp)
+}

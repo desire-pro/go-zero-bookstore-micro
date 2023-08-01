@@ -7,7 +7,7 @@ import (
 	"bookstore/rpc/model/model"
 	"context"
 
-	"github.com/tal-tech/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type AddLogic struct {
@@ -25,11 +25,12 @@ func NewAddLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddLogic {
 }
 
 func (l *AddLogic) Add(in *add.AddReq) (*add.AddResp, error) {
-	// 4. 在 AddLogic 添加逻辑中 调用 check 服务
+	// 4. 在 AddLogic 調用 check 服務
 	resp, err := l.svcCtx.Checker.Check(l.ctx, &checker.CheckReq{
 		Book: in.Book,
 	})
-	if err == model.ErrNotFound {
+
+	if resp == nil {
 		_, err = l.svcCtx.Model.Insert(model.Book{
 			Book:  in.Book,
 			Price: in.Price,
@@ -40,7 +41,39 @@ func (l *AddLogic) Add(in *add.AddReq) (*add.AddResp, error) {
 		return &add.AddResp{
 			Ok: true,
 		}, nil
-	}else if err != nil {
+	} else if err != nil {
+		return &add.AddResp{
+			Ok: false,
+		}, nil
+	}
+	if resp.Found {
+		return &add.AddResp{
+			Ok: false,
+		}, nil
+	}
+	return &add.AddResp{
+		Ok: false,
+	}, nil
+}
+
+func (l *AddLogic) Update(in *add.AddReq) (*add.AddResp, error) {
+	// 4. 在 AddLogic 調用 check 服務
+	resp, err := l.svcCtx.Checker.Check(l.ctx, &checker.CheckReq{
+		Book: in.Book,
+	})
+
+	if resp == nil {
+		err = l.svcCtx.Model.Update(model.Book{
+			Book:  in.Book,
+			Price: in.Price,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return &add.AddResp{
+			Ok: true,
+		}, nil
+	} else if err != nil {
 		return &add.AddResp{
 			Ok: false,
 		}, nil

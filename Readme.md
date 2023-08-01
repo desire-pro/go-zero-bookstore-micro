@@ -1,109 +1,133 @@
-## 启动：
-### **注意事项**： dockerfile 文件配置了 LOCAL_HOST 环境变量
+## 介紹：
+用go-zero建置的微服務範例
 
-    1、项目目录下执行 ./docker.sh  脚本生成 rpc服务docker镜像
-       ./docker.sh
+## 代碼結構:
 
-    2、docker-compose-db 创建 mysql redis etcd 容器
-      执行命令：
-      docker-compose -f docker-compose-db.yml up -d
+### API接口 代碼結構
 
-    注意：etcd 使用 k8s 自带的，启动 k8s 之后，需要手动执行 命令：
-        etcd --advertise-client-urls 'http://0.0.0.0:2379' --listen-client-urls 'http://0.0.0.0:2379'
-        注释：--listen-client-urls：对外提供服务的地址：比如http://ip:2379,http://127.0.0.1:2379，客户端会连接到这里和 etcd 交互。
-            --advertise-client-urls：对外公告的该节点客户端监听地址，这个值会告诉集群中其他节点。
-        website： https://www.cnblogs.com/xishuai/p/docker-etcd.html
+api
+├── bookstore.api                  // api描述文件，定義api
+├── bookstore.go                   // main入口定義
+├── etc                             
+│   └── bookstore-api.yaml         // 用來定義項目配置，所有的配置項都可以寫在bookstore-api.yaml中
+└── internal
+    ├── config
+    │   └── config.go              // 服務的配置定義
+    ├── handler                    // API 文件中定義的路由對應的handler的實現
+    │   ├── addhandler.go          // 實現addHandler
+    │   ├── checkhandler.go        // 實現checkHandler
+    │   └── routes.go              // 定義路由處理
+    ├── logic                      // 放每個路由對應的業務邏輯
+    │   ├── addlogic.go            // 實現AddLogic
+    │   └── checklogic.go          // 實現CheckLogic
+    ├── svc
+    │   └── servicecontext.go      // 定義業務邏輯處理的依賴，在main函數創建依賴，通過ServiceContext傳遞給handler和logic
+    └── types
+        └── types.go               // 定義了api請求和返回數據結構
 
-    3、docker-compose-prom 创建 prometheus grafana 容器
-      执行命令：
-      docker-compose -f docker-compose-prom.yml up -d
+> 區分 handler 和 logic 是為了讓業務處理部分盡可能減少依賴，把 HTTP requests 和邏輯處理代碼隔離開，便於後續拆分成 RPC service
+
+---
+
+### RPC 服務代碼結構
+
+rpc/add
+├── add.go                      // rpc服務main函數
+├── add.proto                   // rpc接口定義
+├── adder
+│   ├── adder.go                // 提供了外部調用方法，無需修改
+│   └── types.go                // request/response結構體定義
+├── etc
+│   └── add.yaml                // 配置文件
+├── internal
+│   ├── config
+│   │   └── config.go           // 配置定義
+│   ├── logic
+│   │   └── addlogic.go         // add業務邏輯在這實現
+│   ├── server
+│   │   └── adderserver.go      // 調用入口, 不需要修改
+│   └── svc
+│       └── servicecontext.go   // 定義ServiceContext，傳遞依賴
+└── pb
+    └── add.pb.go               // protoc-gen-go產生的結構檔案
+
+___________________________________________________________________________________________________________________
+
+## RPC 服務
+1、定義服務接口和資料結構
+2、資料庫相互隔離、通過 rpc 相互調用
+3、服務間相互調用, 例如：add 之前需要調用 check 服務 
+    1. 配置 add.yaml 文件添加 check 配置項
+    2. Config addRpc 服務下 添加配置項
+    3. ServiceContext 添加服務上下文配置
+    4. 在 AddLogic 添加邏輯中 調用 check 服務
+
+---
+
+### 新增 RPC 服務 
+
+1、rpc資料夾下建立需要的服務，生成 proto 文件
+    執行命令：
+    cd rpc; mkdir change
+    goctl rpc --o change/change.proto
+
+2、編寫 proto 內容
+
+3、通過.proto 文件一鍵快速生成一個 rpc 服務
+    執行命令：
+    cd change;
+    goctl rpc protoc change.proto --go_out=./pb --go-grpc_out=./pb --zrpc_out=.
+
+    >> 生成目錄結構：參見上方 RPC 服務代碼結構
+
+4、添加配置
+    etc\change.yaml
+
+5、聲明配置類型
+    internal\config\config.go
+
+6、填充依賴
+    internal\svc\servicecontext.go
+
+7、邏輯
+    internal\logic\deletelogic.go
+    internal\logic\updatelogic.go
+
+---
+
+## API 接口新增 RPC 服務
+
+1、 添加yaml 配置
+    api\etc\bookstore-api.yaml
+
+2、 Config 添加服務依賴
+    api\internal\config\config.go
+
+3、 完善服務依賴
+    api\internal\svc\servicecontext.go
+
+4、 編寫業務邏輯
+    api\internal\logic\deletelogic.go
+    api\internal\logic\updatelogic.go
+
+___________________________________________________________________________________________________________________
+
+## 啟動：
+
+1、docker-compose-db 創建 mysql、redis、etcd、phpmyadmin、redisadmin 容器
+    執行命令：
+    docker-compose -f docker-compose-db.yml up -d
+
+2、docker-compose-prom 創建 prometheus、grafana 容器
+    執行命令：
+    docker-compose -f docker-compose-prom.yml up -d
+
+注意：
+    http://127.0.0.1:9090/ 普羅米修斯 web url
+    http://localhost:3000/ Grafana web url
     
-    注意：
-        http://127.0.0.1:9090/ 普罗米修斯 web url
-        http://localhost:3000/ Grafana web url
-      
-    4、docker-compose 创建rpc服务容器，  rpc 服务基于依赖于etcd 服务
-       执行命令：
-       docker-compose up -d      
-       
-### rpc 服务
-    1、定义数据边界
-    2、数据库相互隔离、通过 rpc 相互调用
-    3、服务间相互调用, 例如：add 之前需要调用 check 服务 
-        1. 配置 add.yaml 文件添加 check 配置项
-        2. Config addRpc 服务下 添加配置项
-        3. ServiceContext 添加服务上下文配置
-        4. 在 AddLogic 添加逻辑中 调用 check 服务
-
-
-### 编写 k8s 服务
-## 方法一
-# 注意事项：上 k8s 部署的时候需要注意 etcd 配置，etcd 在 k8s 集群内服务地址
-# 如何查找 etcd 在 k8s 的内部地址， 步骤如下
-# 首先可以通过终端执行命令：`docker ps | grep etcd` 查找到 k8s 的 etcd 容器 `k8s_etcd_etcd-docker-desktop_kube-system_c7cc6a3c3118f127f5fd469ef69477e0_2`
-# 然后执行命令： `kubectl get pods -n kube-system` 查找到 etcd 的 pod 名称 `etcd-docker-desktop`
-# 最后执行命令： `kubectl describe pod etcd-docker-desktop -n kube-system` 查找到 pod 的详情，
-# `advertise-client-urls=https://192.168.65.3:2379` 可以找到 etcd 的内部 IP
-
-## 方法二
-# k8s dashboard 
-# 执行 `kubectl proxy` 命令
-# 在浏览器访问 `http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login`
-# 命名空间选择 `kube-system` 然后找到 etcd 的 pod， 点击进入 pod 就可以看到详情。可以找到 etcd 的内部 IP
-
-## 启动 kubernetes-dashboard 命令
-
-
-##  生成 k8s checkrpc.yaml 配置文件
-
-    goctl kube deploy -name checkrpc -namespace discov -image checkrpc:0.0.1 -o checkrpc.yaml -port 8081
-
-## k8s 部署服务 如果 checkrpc namespace 不存在的话，请先通过 kubectl create namespace checkrpc 创建
-
-    kubectl create namespace discov
-
-## 首先部署 etcd
-
-    kubectl apply -f etcd.yaml 
-
-## 部署
-
-    kubectl apply -f checkrpc.yaml 
-
-## 测试
-    kubectl run -i --tty --rm cli --image=checkrpc:0.0.1 -n discov -- sh
+3、docker-compose 創建rpc服務容器，rpc 服務基於依賴於 etcd 服務
+    執行命令：
+    docker-compose up      
 
 ___________________________________________________________________________________________________________________
-
-## 生成 k8s addrpc.yaml 配置文件
-
-    goctl kube deploy -name addrpc -namespace discov -image addrpc:0.0.1 -o addrpc.yaml -port 8080
-
-## k8s 部署服务 如果 addrpc namespace 不存在的话，请先通过 kubectl create namespace addrpc 创建
-
-    kubectl create namespace discov
-
-## 部署
-
-    kubectl apply -f addrpc.yaml 
-
-## 测试
-    kubectl run -i --tty --rm cli --image=addrpc:0.0.1 -n discov -- sh
-___________________________________________________________________________________________________________________
-
-## 生成 k8s apirpc.yaml 配置文件
-
-    goctl kube deploy -name apirpc -namespace discov -image apirpc:0.0.1 -o apirpc.yaml -port 8888
-
-## k8s 部署服务 如果 apirpc namespace 不存在的话，请先通过 kubectl create namespace apirpc 创建
-
-    kubectl create namespace discov
-
-## 部署
-
-    kubectl apply -f apirpc.yaml 
-
-## 测试
-    kubectl run -i --tty --rm cli --image=apirpc:0.0.1 -n discov -- sh
-__________________________________________________________________________
-

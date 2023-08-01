@@ -1,13 +1,14 @@
 package config
 
 import (
-	"github.com/tal-tech/go-zero/rest"
-	"github.com/tal-tech/go-zero/zrpc"
+	"github.com/zeromicro/go-zero/rest"
+	"github.com/zeromicro/go-zero/zrpc"
 )
 
-/*添加服务依赖*/
+// Config 添加服務依賴
 type Config struct {
 	rest.RestConf
-	Add   zrpc.RpcClientConf
-	Check zrpc.RpcClientConf
+	Add    zrpc.RpcClientConf
+	Check  zrpc.RpcClientConf
+	Change zrpc.RpcClientConf
 }

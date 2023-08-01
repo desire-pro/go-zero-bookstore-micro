@@ -1,7 +1,7 @@
 Name: add.rpc
-ListenOn: 0.0.0.0:8080
+ListenOn: 0.0.0.0:8082
 
-# 首先添加 check 配置项
+# 添加 check 連線設定
 Check:
   Etcd:
     Hosts:
@@ -13,10 +13,10 @@ Etcd:
     - etcd:2379
   Key: add.rpc
 
-DataSource: root:123456@tcp(${LOCAL_HOST}:33306)/gozero
+DataSource: root:123456@tcp(db:3306)/gozero
 Table: book
 Cache:
-  - Host: ${LOCAL_HOST}:7379
+  - Host: redis:6379
 
 Prometheus:
   Host: 0.0.0.0

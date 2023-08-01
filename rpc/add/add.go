@@ -12,9 +12,9 @@ import (
 	"bookstore/rpc/add/internal/svc"
 	add "bookstore/rpc/add/pb"
 
-	"github.com/tal-tech/go-zero/core/conf"
-	"github.com/tal-tech/go-zero/core/logx"
-	"github.com/tal-tech/go-zero/zrpc"
+	"github.com/zeromicro/go-zero/core/conf"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 )
 
@@ -24,7 +24,7 @@ func main() {
 	flag.Parse()
 
 	var c config.Config
-	conf.MustLoad(*configFile, &c, conf.UseEnv())
+	conf.MustLoad(*configFile, &c)
 	ctx := svc.NewServiceContext(c)
 	adderSrv := server.NewAdderServer(ctx)
 

@@ -18,3 +18,20 @@ type CheckResp struct {
 	Found bool  `json:"found"`
 	Price int64 `json:"price"`
 }
+
+type UpdateReq struct {
+	Book  string `form:"book"`
+	Price int64  `form:"price"`
+}
+
+type UpdateResp struct {
+	Ok bool `json:"ok"`
+}
+
+type DeleteReq struct {
+	Book string `form:"book"`
+}
+
+type DeleteResp struct {
+	Ok bool `json:"ok"`
+}

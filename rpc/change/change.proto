@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package change;
+
+option go_package = "./"; // 指定生成的go文件所在path
+
+message updateReq {
+  string book = 1;
+  int64 price = 2;
+}
+
+message deleteReq {
+  string book = 1;
+}
+
+message updateResp {
+  bool ok = 1;
+}
+
+message deleteResp {
+  bool ok = 1;
+}
+
+service changer {
+  rpc update(updateReq) returns(updateResp);
+  rpc delete(deleteReq) returns(deleteResp);
+}

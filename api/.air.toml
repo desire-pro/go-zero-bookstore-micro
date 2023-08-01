@@ -1,0 +1,46 @@
+# [Air](https://github.com/cosmtrek/air) TOML 格式的配置文件
+ 
+# 工作目錄
+# 使用 . 或絕對路徑，請注意 `tmp_dir` 目錄必須在 `root` 目錄下
+root = "."
+tmp_dir = "tmp"
+ 
+[build]
+# 只需要寫你平常編譯使用的shell命令。你也可以使用 `make`
+# Windows平台示例: cmd = "go build -o tmp\main.exe ."
+cmd = "go build -o ./tmp/bookstore /app/api/bookstore.go"
+# 由`cmd`命令得到的二進制文件名
+# Windows平台示例：bin = "tmp\main.exe"
+bin = "tmp/bookstore"
+# 自定義執行程序的命令，可以添加額外的編譯標識例如添加 GIN_MODE=release
+# Windows平台示例：full_bin = "tmp\main.exe"
+full_bin = "APP_ENV=dev APP_USER=air ./tmp/bookstore -f ../app/api/etc/bookstore-api.yaml"
+# 監聽以下文件擴展名的文件.
+include_ext = ["go", "tpl", "tmpl", "html"]
+# 忽略這些文件擴展名或目錄
+exclude_dir = ["assets", "tmp", "vendor", "frontend/node_modules"]
+# 監聽以下指定目錄的文件
+include_dir = []
+# 排除以下文件
+exclude_file = []
+# 如果文件更改過於頻繁，則沒有必要在每次更改時都觸發構建。可以設置觸發構建的延遲時間 單位: ms
+delay = 1000
+# 發生構建錯誤時，停止運行舊的二進制文件。
+stop_on_error = true
+# air的日志文件名，該日志文件放置在你的`tmp_dir`中
+log = "air_errors.log"
+ 
+[log]
+# 顯示日志時間
+time = true
+ 
+[color]
+# 自定義每個部分顯示的顏色。如果找不到顏色，使用原始的應用程序日志。
+main = "magenta"
+watcher = "cyan"
+build = "yellow"
+runner = "green"
+ 
+[misc]
+# 退出時刪除tmp目錄
+clean_on_exit = true

@@ -4,7 +4,7 @@ services:
   db:
     container_name: db
     image: mysql:8.0.22
-#    restart: always
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: "123456"
     command:
@@ -14,36 +14,52 @@ services:
       --explicit_defaults_for_timestamp=true
       --lower_case_table_names=1
     ports:
-      - 33306:3306
+      - 3306:3306
     volumes:
       - ./data/mysql:/var/lib/mysql
+  
+  db-adminer:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      PMA_HOSTS: db
+      PMA_PORT: 3306
+    ports:
+      - "3300:80"
 
   redis:
     image: redis:6.0.9
-#    restart: always
+    restart: always
     container_name: redis
     ports:
-      - "7379:6379"
+      - "6379:6379"
     volumes:
       - ./data/redis:/data
+  
+  redis-admin:
+    image: jj891070/apache2-phpredisadmin
+    restart: always
+    ports:
+      - "3200:80"
+    environment:
+      - JAY_REDIS_HOSTS=redis
+    depends_on:
+      - redis
 
-#  etcd:
-#    container_name: etcd
-#    image: bitnami/etcd:latest
-#    restart: always
-#    environment:
-#      - ALLOW_NONE_AUTHENTICATION=yes
-#    expose:
-#      - 2379
-#      - 2380
-#    ports:
-#      - "2379:2379"
-#    volumes:
-#      - etcd_data:/bitnami/etcd
+  etcd:
+   container_name: etcd
+   image: bitnami/etcd:latest
+   hostname: etcd
+   restart: always
+   ports:
+      - "2379:2379"
+      - "2380:2380"
+   environment:
+     - ALLOW_NONE_AUTHENTICATION=yes
+     - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+   volumes:
+     - etcd_data:/bitnami/etcd
 
 volumes:
     etcd_data:
       driver: local
-
-
-

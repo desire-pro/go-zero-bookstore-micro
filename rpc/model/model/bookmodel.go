@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tal-tech/go-zero/core/stores/cache"
-	"github.com/tal-tech/go-zero/core/stores/sqlc"
-	"github.com/tal-tech/go-zero/core/stores/sqlx"
-	"github.com/tal-tech/go-zero/core/stringx"
-	"github.com/tal-tech/go-zero/tools/goctl/model/sql/builderx"
+	"github.com/zeromicro/go-zero/core/stores/cache"
+	"github.com/zeromicro/go-zero/core/stores/sqlc"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"github.com/zeromicro/go-zero/core/stringx"
+	"github.com/zeromicro/go-zero/tools/goctl/model/sql/builderx"
 )
 
 var (
@@ -66,13 +66,12 @@ func (m *BookModel) Update(data Book) error {
 	bookBookKey := fmt.Sprintf("%s%v", cacheBookBookPrefix, data.Book)
 	_, err := m.Exec(func(conn sqlx.SqlConn) (result sql.Result, err error) {
 		query := `update ` + m.table + ` set ` + bookRowsWithPlaceHolder + ` where book = ?`
-		return conn.Exec(query, data.Price, data.Book)
+		return conn.Exec(query, data.Book, data.Price, data.Book)
 	}, bookBookKey)
 	return err
 }
 
 func (m *BookModel) Delete(book string) error {
-
 	bookBookKey := fmt.Sprintf("%s%v", cacheBookBookPrefix, book)
 	_, err := m.Exec(func(conn sqlx.SqlConn) (result sql.Result, err error) {
 		query := `delete from ` + m.table + ` where book = ?`
@@ -80,4 +79,3 @@ func (m *BookModel) Delete(book string) error {
 	}, bookBookKey)
 	return err
 }
-

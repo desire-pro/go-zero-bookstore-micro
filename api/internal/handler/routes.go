@@ -6,20 +6,32 @@ import (
 
 	"bookstore/api/internal/svc"
 
-	"github.com/tal-tech/go-zero/rest"
+	"github.com/zeromicro/go-zero/rest"
 )
 
-func RegisterHandlers(engine *rest.Server, serverCtx *svc.ServiceContext) {
-	engine.AddRoutes([]rest.Route{
-		{
-			Method:  http.MethodGet,
-			Path:    "/add",
-			Handler: addHandler(serverCtx),
+func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/add",
+				Handler: addHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/check",
+				Handler: checkHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/update",
+				Handler: UpdateHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/delete",
+				Handler: DeleteHandler(serverCtx),
+			},
 		},
-		{
-			Method:  http.MethodGet,
-			Path:    "/check",
-			Handler: checkHandler(serverCtx),
-		},
-	})
+	)
 }
