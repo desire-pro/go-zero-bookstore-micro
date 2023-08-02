@@ -12,7 +12,6 @@ services:
       - 9091:9091
     volumes:
       - ./data/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-
   grafana:
     image: grafana/grafana
     container_name: grafana
@@ -22,7 +21,6 @@ services:
       - '3000:3000'
 #    networks:
 #      - monitor
-
   node-exporter:
     image: prom/node-exporter
     container_name: node-exporter
